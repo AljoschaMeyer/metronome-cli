@@ -67,6 +67,7 @@ vorpal.command 'freq <frequency>'
 vorpal.command 'tone [frequency] [seconds]'
   .description 'play the current or given frequency'
   .action (args, cb) ->
+    metronome.stop()
     f = freq
     f = args.frequency if args.frequency?
     dur = 2
