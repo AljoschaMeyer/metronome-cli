@@ -64,6 +64,17 @@ vorpal.command 'freq <frequency>'
     freq = args.frequency
     cb()
 
+vorpal.command 'tone [frequency] [seconds]'
+  .description 'play the current or given frequency'
+  .action (args, cb) ->
+    f = freq
+    f = args.frequency if args.frequency?
+    dur = 2
+    dur = args.seconds if args.seconds?
+
+    sound f, dur
+    cb()
+
 vorpal.command 'meter <meter>'
   .description 'set the current meter'
   .action (args, cb) ->
