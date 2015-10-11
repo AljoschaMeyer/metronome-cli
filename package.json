@@ -27,6 +27,7 @@
     "coffee-script": "^1.10.0"
   },
   "dependencies": {
+    "audio-generator": "^1.0.3",
     "chalk": "^1.1.1",
     "onetwoeight": "0.0.1",
     "speaker": "^0.2.6",

@@ -1,48 +1,62 @@
-# based on https://github.com/TooTallNate/node-speaker/blob/master/examples/sine.js
+Generator = require 'audio-generator'
+Speaker = require 'speaker'
 
-module.exports = (freq, duration) ->
+speaker = new Speaker()
+sine = Generator {
+  generate: (time) ->
+    return [Math.sin(Math.PI * 2 * time * controls.freq), Math.sin(Math.PI * 2 * time * controls.freq)]
+  duration: Infinity,
+  channels: 2,
+  sampleRate: 44100,
+  byteOrder: 'LE',
+  bitDepth: 16,
+  signed: true,
+  float: false,
+  samplesPerFrame: 64,
+  interleaved: true
+}
+metro = Generator {
+  generate: (time) ->
+    return [0, 0] if (time % (60 / controls.bpm)) > controls.length
+    return [Math.sin(Math.PI * 2 * time * controls.freq), Math.sin(Math.PI * 2 * time * controls.freq)]
+  duration: Infinity,
+  channels: 2,
+  sampleRate: 44100,
+  byteOrder: 'LE',
+  bitDepth: 16,
+  signed: true,
+  float: false,
+  samplesPerFrame: 64,
+  interleaved: true
+}
 
-  # the Readable "_read()" callback function
-  read = (n) ->
-    sampleSize = @bitDepth / 8
-    blockAlign = sampleSize * @channels
-    numSamples = n / blockAlign | 0
-    buf = new Buffer(numSamples * blockAlign)
-    amplitude = 32760 # Max amplitude for 16-bit audio
+startMetro = () ->
+  sine.unpipe()
+  controls.runningSine = false
+  controls.runningMetro = true
+  metro.pipe speaker
 
-    # the "angle" used in the function, adjusted for the number of
-    # channels and sample rate. This value is like the period of the wave.
-    t = (Math.PI * 2 * freq) / @sampleRate
-    i = 0
+stopMetro = () ->
+ metro.unpipe()
+ controls.runningMetro = false
 
-    while i < numSamples
+startSine = () ->
+  metro.unpipe()
+  controls.runningMetro = false
+  controls.runningSine = true
+  sine.pipe speaker
 
-      # fill with a simple sine wave at max amplitude
-      channel = 0
+stopSine = () ->
+ sine.unpipe()
+ controls.runningSine = false
 
-      while channel < @channels
-        s = @samplesGenerated + i
-        val = Math.round(amplitude * Math.sin(t * s)) # sine wave
-        offset = (i * sampleSize * @channels) + (channel * sampleSize)
-        buf["writeInt" + @bitDepth + "LE"] val, offset
-        channel++
-      i++
-    @push buf
-    @samplesGenerated += numSamples
-
-    # after generating "duration" second of audio, emit "end"
-    @push null  if @samplesGenerated >= @sampleRate * duration
-
-  Readable = require("stream").Readable
-  Speaker = require("speaker")
-
-  #freq = parseFloat(process.argv[2], 10) or 440.0
-  #duration = parseFloat(process.argv[3], 10) or 2.0
-
-  sine = new Readable()
-  sine.bitDepth = 16
-  sine.channels = 2
-  sine.sampleRate = 44100
-  sine.samplesGenerated = 0
-  sine._read = read
-  sine.pipe new Speaker()
+module.exports = controls =
+  startSine: startSine
+  stopSine: stopSine
+  startMetro: startMetro
+  stopMetro: stopMetro
+  runningSine: false
+  runningMetro: false
+  freq: 440
+  bpm: 120
+  length: 0.1

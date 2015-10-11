@@ -3,12 +3,12 @@ vorpalLog = require 'vorpal-log'
 chalk = require 'chalk'
 onetwoeight = require 'onetwoeight'
 
-metronome = (require './metronome')()
 sound = require './sound'
 
 avg = 20
 tol = 0.5
 bpm = new onetwoeight avg, tol
+globalFrequency = 440
 
 # execute cb if arg can be parsed as nonzero, positive integer, else log
 expectInt = (arg, cb) ->
@@ -26,32 +26,50 @@ expectFloat = (arg, cb) ->
     logger.warn "invalid argument, expected #{arg} to be a nonzero float"
 
 vorpal.updateDelimiter = ->
-  tempoInfo = "#{Math.round metronome.bpm}"
+  tempoInfo = "#{Math.round sound.bpm}"
   while tempoInfo.length < 3
     tempoInfo = " #{tempoInfo}"
   delText = "[bpm: #{tempoInfo}]:"
 
   return @delimiter delText
 
-metronome.eventEmitter.on 'started', ->
-  vorpal.updateDelimiter()
-  logger.confirm 'started metronome'
+startMetronome = () ->
+  if sound.runningMetro
+    logger.error 'already playing metronome'
+  else
+    if sound.runningSine
+      logger.warn 'stopping tone'
+      sound.stopSine()
+    sound.startMetro()
+    logger.confirm 'started metronome'
 
-metronome.eventEmitter.on 'stopped', ->
-  vorpal.updateDelimiter()
-  logger.confirm 'stopped metronome'
+stopMetronome = () ->
+  if sound.runningMetro
+    sound.stopMetro()
+    logger.confirm 'stopped metronome'
 
-metronome.eventEmitter.on 'bpm', (bpm) ->
-  vorpal.updateDelimiter()
-  logger.confirm "set bpm to #{bpm}"
+startTone = () ->
+  if sound.runningSine
+    logger.error 'already playing tone'
+  else
+    if sound.runningMetro
+      logger.warn 'stopping metronome'
+      sound.stopMetro()
+    sound.startSine()
+    logger.confirm 'started tone'
 
-freq = 440
+stopTone = () ->
+  if sound.runningSine
+    sound.stopSine()
+    logger.confirm 'stopped tone'
 
-metronome.eventEmitter.on 'tick', ->
-  sound freq, 0.05
-
-metronome.eventEmitter.on 'tock', ->
-  sound freq / 2, 0.05
+setBPM = (bpm) ->
+  bpm = 440 if bpm > 440
+  changed = bpm isnt sound.bpm
+  sound.bpm = bpm
+  if changed
+    vorpal.updateDelimiter()
+    logger.confirm "set bpm to #{bpm}"
 
 vorpal.use vorpalLog, {markdown: true}
   .updateDelimiter()
@@ -63,14 +81,14 @@ vorpal.command 'start'
   .description 'start the metronome'
   .alias 'play'
   .action (args, cb) ->
-    metronome.start()
+    startMetronome()
     cb()
 
 vorpal.command 'stop'
   .description 'stops the metronome'
   .alias 'end'
   .action (args, cb) ->
-    metronome.stop()
+    stopMetronome()
     cb()
 
 vorpal.command 'freq [frequency]'
@@ -78,52 +96,62 @@ vorpal.command 'freq [frequency]'
   .alias 'frequency'
   .action (args, cb) ->
     unless args.frequency?
-      logger.info "frequency: #{freq}"
+      logger.info "frequency: #{globalFrequency}"
       return cb()
     expectInt args.frequency, (f) ->
-      freq = f
+      globalFrequency = f
+      sound.freq = f
       logger.confirm "set frequency to #{f}"
+    cb()
+
+vorpal.command 'length [seconds]'
+  .description 'set the length of the metronome ticks'
+  .action (args, cb) ->
+    unless args.seconds?
+      logger.info "length: #{sound.length}"
+      return cb()
+    expectFloat args.seconds, (l) ->
+      sound.length = l
+      logger.confirm "set length to #{l}"
     cb()
 
 vorpal.command 'tone [frequency] [seconds]'
   .description 'play the current or given frequency'
   .action (args, cb) ->
-    metronome.stop()
-    f = freq
-    f = args.frequency if args.frequency?
-    dur = 2
-    dur = args.seconds if args.seconds? and (typeof args.seconds) is 'number'
+    if sound.runningSine
+      logger.error 'already playing tone'
+      cb()
+    else
+      f = globalFrequency
+      f = args.frequency if args.frequency?
+      dur = 2
+      dur = args.seconds if args.seconds? and (typeof args.seconds) is 'number'
 
-    expectInt f, (frequ) ->
-      sound frequ, dur
-    cb()
+      expectInt f, (frequ) ->
+        sound.freq = frequ
+        startTone()
 
-vorpal.command 'meter [meter]'
-  .description 'set the current meter'
-  .action (args, cb) ->
-    unless args.meter?
-      logger.info "meter: #{metronome.meter}"
-      return cb()
-    expectInt args.meter, (m) ->
-      metronome.setMeter m
-      logger.confirm "set meter to #{m}"
-    cb()
+        setTimeout (frequency) ->
+          stopTone()
+          sound.freq = frequency
+        , dur * 1000, globalFrequency
+      cb()
 
 vorpal.command 'bpm [bpm]'
   .description 'set the current bpm'
   .action (args, cb) ->
     unless args.bpm?
-      logger.info "bpm: #{metronome.bpm}"
+      logger.info "bpm: #{sound.bpm}"
       return cb()
     expectInt args.bpm, (b) ->
-      metronome.setBPM b
+      setBPM b
     cb()
 
 vorpal.command 'add <bpm>'
   .description 'add to the current bpm'
   .action (args, cb) ->
     expectInt args.bpm, (b) ->
-      metronome.setBPM(metronome.bpm + b)
+      setBPM sound.bpm + b
     cb()
 
 vorpal.command 'mul <factor>'
@@ -131,7 +159,7 @@ vorpal.command 'mul <factor>'
   .alias 'multiply'
   .action (args, cb) ->
     expectFloat args.factor, (f) ->
-      metronome.setBPM Math.round (metronome.bpm * f)
+      setBPM Math.round sound.bpm * f
     cb()
 
 vorpal.command 'tapwindow [window]'
@@ -162,7 +190,7 @@ vorpal.catch '[input...]'
   .action (args, cb) ->
     if args.input? and args.input.length = 1
       expectInt args.input[0], (b) ->
-        metronome.setBPM b
+        setBPM b
       return cb()
     vorpal.exec 'help'
     cb()
@@ -170,22 +198,22 @@ vorpal.catch '[input...]'
 vorpal.on 'keypress', (data) ->
   if data?
     if data.e.key.ctrl and data.e.key.name is 'p'
-      if metronome.mode is 'idle'
-        metronome.start()
-      else if metronome.mode is 'running'
-        metronome.stop()
+      if sound.runningMetro
+        stopMetronome()
+      else
+        startMetronome()
     else if data.e.key.ctrl and data.e.key.name is 'left'
-      metronome.setBPM(metronome.bpm - 1)
+      setBPM(sound.bpm - 1)
     else if data.e.key.ctrl and data.e.key.name is 'right'
-      metronome.setBPM(metronome.bpm + 1)
+      setBPM(sound.bpm + 1)
     else if data.e.key.meta and data.e.key.name is 'left'
-      metronome.setBPM(metronome.bpm - 4)
+      setBPM(sound.bpm - 4)
     else if data.e.key.meta and data.e.key.name is 'right'
-      metronome.setBPM(metronome.bpm + 4)
+      setBPM(sound.bpm + 4)
     else if data.e.key.ctrl and data.e.key.name is '`'
       bpm.tap()
       newbpm = bpm.bpm()
-      metronome.setBPM newbpm if newbpm?
+      setBPM newbpm if newbpm?
 
 logger.info '# Welcome to metronome-cli'
 logger.info 'run `help` for a overview of the available commands'
