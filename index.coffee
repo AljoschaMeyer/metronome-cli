@@ -41,8 +41,13 @@ metronome.eventEmitter.on 'bpm', (bpm) ->
   vorpal.updateDelimiter()
   logger.confirm "changed bpm to #{bpm}"
 
+freq = 440
+
 metronome.eventEmitter.on 'tick', ->
-  sound 440, 0.05
+  sound freq, 0.05
+
+metronome.eventEmitter.on 'tock', ->
+  sound freq / 2, 0.05
 
 vorpal.use vorpalLog, {markdown: true}
   .updateDelimiter()
@@ -74,6 +79,19 @@ vorpal.command 'mute'
   .description 'mute the sound'
   .action (args, cb) ->
     metronome.mute()
+    cb()
+
+vorpal.command 'freq <frequency>'
+  .description 'set the pitch'
+  .alias 'frequency'
+  .action (args, cb) ->
+    freq = args.frequency
+    cb()
+
+vorpal.command 'meter <meter>'
+  .description 'set the current meter'
+  .action (args, cb) ->
+    metronome.setMeter args.meter
     cb()
 
 vorpal.command 'bpm <bpm>'

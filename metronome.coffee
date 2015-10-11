@@ -26,21 +26,33 @@ module.exports = () ->
     changed = metronome.bpm isnt bpm
     metronome.bpm = bpm
     eventEmitter.emit 'bpm', bpm if changed
+  setMeter = (meter) ->
+    changed = metronome.meter isnt meter
+    metronome.meter = meter
+    eventEmitter.emit 'meter', meter if changed
+
+  meterTrack = 0
 
   onTick = (expectedBPM) ->
-    eventEmitter.emit 'tick'
+    eventEmitter.emit if meterTrack is 0 then 'tick' else 'tock'
+
+    meterTrack++
+    meterTrack = 0 if meterTrack >= metronome.meter
+
     if expectedBPM isnt metronome.bpm
       clearInterval intervalObject
 
-      intervalObject = setInterval onTick, ((60 / metronome.bpm) * 1000), metronome.bpm      
+      intervalObject = setInterval onTick, ((60 / metronome.bpm) * 1000), metronome.bpm
 
   return metronome =
     eventEmitter: eventEmitter
     mode: 'idle'
     bpm: 120
     silent: false
+    meter: 1
     start: start
     stop: stop
     mute: mute
     unmute: unmute
     setBPM: setBPM
+    setMeter: setMeter

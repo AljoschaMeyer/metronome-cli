@@ -13,6 +13,8 @@ Tap for bpm, or set set bpm directly and play them.
 - `bpm <bpm>`: set the current bpm
 - `add` <bpm>: add to the current bpm
 - `mul <factor>` alias `multiply <factor>`: multiply the current bpm with factor
+- `meter <meter>`: set the meter, the first tone of a meter is played higher
+- `freq <frequency>` alias `frequency <frequency>`: set the pitch to use
 - `tap [avg] [tolerance]`: set the current bpm by tapping any keys.
   - `[avg]`: integer which specifies how many of the last taps should be used
     - defaults to 20
