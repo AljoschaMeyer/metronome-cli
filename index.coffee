@@ -122,3 +122,8 @@ vorpal.on 'keypress', (data) ->
         metronome.start()
       else if metronome.mode is 'running'
         metronome.stop()
+
+logger.info '# Welcome to metronome-cli'
+logger.info 'run `help` for a overview of the available commands'
+logger.info 'protip: `ctrl + p` toggles playing, `ctrl + s` toggles silent mode'
+logger.info 'protip#2: just enter any number to set bpm without needing a command'
