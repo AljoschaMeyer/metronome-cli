@@ -1,19 +1,20 @@
 vorpal = (require 'vorpal')()
 vorpalLog = require 'vorpal-log'
 chalk = require 'chalk'
+onetwoeight = require 'onetwoeight'
 
 metronome = (require './metronome')()
 sound = require './sound'
+
+avg = 20
+tol = 0.5
+bpm = new onetwoeight avg, tol
 
 vorpal.updateDelimiter = ->
   tempoInfo = "#{Math.round metronome.bpm}"
   while tempoInfo.length < 3
     tempoInfo = " #{tempoInfo}"
-
-  modeInfo = ''
-  modeInfo = ' tap' if metronome.mode is 'tap'
-
-  delText = "[#{tempoInfo}#{modeInfo}]:"
+  delText = "[bpm: #{tempoInfo}]:"
 
   return @delimiter delText
 
@@ -101,6 +102,20 @@ vorpal.command 'mul <factor>'
     metronome.setBPM(metronome.bpm * args.factor)
     cb()
 
+vorpal.command 'tapwindow <window>'
+  .description 'how many of the last tabs are used when tapping a tempo'
+  .action (args, cb) ->
+    avg = args.window
+    bpm = new onetwoeight avg, tol
+    cb()
+
+vorpal.command 'taptolerance <tolerance>'
+  .description 'tolerance when tapping a tempo'
+  .action (args, cb) ->
+    tol = args.tolerance
+    bpm = new onetwoeight avg, tol
+    cb()
+
 vorpal.catch '[input...]'
   .action (args, cb) ->
     if args.input? and args.input.length = 1
@@ -128,6 +143,10 @@ vorpal.on 'keypress', (data) ->
       metronome.setBPM(metronome.bpm - 4)
     else if data.e.key.meta and data.e.key.name is 'right'
       metronome.setBPM(metronome.bpm + 4)
+    else if data.e.key.ctrl and data.e.key.name is '`'
+      bpm.tap()
+      newbpm = bpm.bpm()
+      metronome.setBPM newbpm if newbpm?
 
 logger.info '# Welcome to metronome-cli'
 logger.info 'run `help` for a overview of the available commands'
