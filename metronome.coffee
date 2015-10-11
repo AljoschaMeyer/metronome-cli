@@ -15,6 +15,7 @@ module.exports = () ->
     clearInterval intervalObject
     eventEmitter.emit 'stopped' if changed
   setBPM = (bpm) ->
+    bpm = 800 if bpm > 800
     changed = metronome.bpm isnt bpm
     metronome.bpm = bpm
     eventEmitter.emit 'bpm', bpm if changed
