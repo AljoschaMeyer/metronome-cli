@@ -21,5 +21,6 @@ Tap for bpm, or set set bpm directly and play them.
     - example: when tapping at 60 bpm with tolerance of 0.5, tap mode will end if you don't tap for (60sec/60bpm)\*((1 + 0.5)bpm) = 1.5 sec, or if you tap to fast (twice in (60sec/60bpm)\*((1 - 0.5)bpm) = 0.5 sec)
 
 Shortcuts:
-  - the empty command toggles between starting and stopping the metronome
+  - use `ctrl + p` to toggle playing
+  - use `ctrl + s` to toggle sound
   - writing an integer without any command sets the bpm to that integer

@@ -7,24 +7,29 @@ metronome =
   bpm: 120
   silent: false
   start: () ->
+    changed = metronome.mode isnt 'running'
     metronome.mode = 'running'
-    vorpal.updateDelimiter()
+    vorpal.updateDelimiter() if changed
     logger.confirm 'started metronome'
   stop: () ->
+    changed = metronome.mode isnt 'idle'
     metronome.mode = 'idle'
-    vorpal.updateDelimiter()
+    vorpal.updateDelimiter() if changed
     logger.confirm 'stopped metronome'
   mute: () ->
+    changed = not metronome.silent
     metronome.silent = true
-    vorpal.updateDelimiter()
+    vorpal.updateDelimiter() if changed
     logger.confirm 'muted sound'
   unmute: () ->
+    changed = metronome.silent
     metronome.silent = false
-    vorpal.updateDelimiter()
+    vorpal.updateDelimiter() if changed
     logger.confirm 'unmuted sound'
   setBPM: (bpm) ->
+    changed = metronome.bpm isnt bpm
     metronome.bpm = bpm
-    vorpal.updateDelimiter()
+    vorpal.updateDelimiter() if changed
     logger.confirm "set bpm to #{bpm}"
 
 vorpal.updateDelimiter = ->
@@ -104,3 +109,16 @@ vorpal.catch '[input...]'
 
     vorpal.exec 'help'
     cb()
+
+vorpal.on 'keypress', (data) ->
+  if data?
+    if data.e.key.ctrl and data.e.key.name is 's'
+      if metronome.silent
+        metronome.unmute()
+      else
+        metronome.mute()
+    else if data.e.key.ctrl and data.e.key.name is 'p'
+      if metronome.mode is 'idle'
+        metronome.start()
+      else if metronome.mode is 'running'
+        metronome.stop()
