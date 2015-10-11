@@ -3,6 +3,7 @@ vorpalLog = require 'vorpal-log'
 chalk = require 'chalk'
 
 metronome = (require './metronome')()
+sound = require './sound'
 
 vorpal.updateDelimiter = ->
   tempoInfo = "#{Math.round metronome.bpm}"
@@ -41,7 +42,7 @@ metronome.eventEmitter.on 'bpm', (bpm) ->
   logger.confirm "changed bpm to #{bpm}"
 
 metronome.eventEmitter.on 'tick', ->
-  logger.log 'tick'
+  sound 440, 0.05
 
 vorpal.use vorpalLog, {markdown: true}
   .updateDelimiter()

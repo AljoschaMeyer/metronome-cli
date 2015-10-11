@@ -29,6 +29,7 @@
   "dependencies": {
     "chalk": "^1.1.1",
     "onetwoeight": "0.0.1",
+    "speaker": "^0.2.6",
     "vorpal": "^1.3.9",
     "vorpal-log": "0.0.3"
   }
