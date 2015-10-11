@@ -10,6 +10,21 @@ avg = 20
 tol = 0.5
 bpm = new onetwoeight avg, tol
 
+# execute cb if arg can be parsed as nonzero, positive integer, else log
+expectInt = (arg, cb) ->
+  int = parseInt arg
+  if int? and int > 0
+    cb int
+  else
+    logger.warn "invalid argument, expected #{arg} to be a nonzero, positive integer"
+
+expectFloat = (arg, cb) ->
+  flt = parseFloat arg
+  if arg? and (not isNaN flt) and (flt isnt 0)
+    cb flt
+  else
+    logger.warn "invalid argument, expected #{arg} to be a nonzero float"
+
 vorpal.updateDelimiter = ->
   tempoInfo = "#{Math.round metronome.bpm}"
   while tempoInfo.length < 3
@@ -28,7 +43,7 @@ metronome.eventEmitter.on 'stopped', ->
 
 metronome.eventEmitter.on 'bpm', (bpm) ->
   vorpal.updateDelimiter()
-  logger.confirm "changed bpm to #{bpm}"
+  logger.confirm "set bpm to #{bpm}"
 
 freq = 440
 
@@ -65,7 +80,9 @@ vorpal.command 'freq [frequency]'
     unless args.frequency?
       logger.info "frequency: #{freq}"
       return cb()
-    freq = args.frequency
+    expectInt args.frequency, (f) ->
+      freq = f
+      logger.confirm "set frequency to #{f}"
     cb()
 
 vorpal.command 'tone [frequency] [seconds]'
@@ -75,9 +92,10 @@ vorpal.command 'tone [frequency] [seconds]'
     f = freq
     f = args.frequency if args.frequency?
     dur = 2
-    dur = args.seconds if args.seconds?
+    dur = args.seconds if args.seconds? and (typeof args.seconds) is 'number'
 
-    sound f, dur
+    expectInt f, (frequ) ->
+      sound frequ, dur
     cb()
 
 vorpal.command 'meter [meter]'
@@ -86,29 +104,34 @@ vorpal.command 'meter [meter]'
     unless args.meter?
       logger.info "meter: #{metronome.meter}"
       return cb()
-    metronome.setMeter args.meter
+    expectInt args.meter, (m) ->
+      metronome.setMeter m
+      logger.confirm "set meter to #{m}"
     cb()
 
 vorpal.command 'bpm [bpm]'
   .description 'set the current bpm'
   .action (args, cb) ->
     unless args.bpm?
-      loggerole.info "bpm: #{metronome.bpm}"
+      logger.info "bpm: #{metronome.bpm}"
       return cb()
-    metronome.setBPM args.bpm
+    expectInt args.bpm, (b) ->
+      metronome.setBPM b
     cb()
 
 vorpal.command 'add <bpm>'
   .description 'add to the current bpm'
   .action (args, cb) ->
-    metronome.setBPM(metronome.bpm + args.bpm)
+    expectInt args.bpm, (b) ->
+      metronome.setBPM(metronome.bpm + b)
     cb()
 
 vorpal.command 'mul <factor>'
   .description 'multiply the current bpm with the factor'
   .alias 'multiply'
   .action (args, cb) ->
-    metronome.setBPM(metronome.bpm * args.factor)
+    expectFloat args.factor, (f) ->
+      metronome.setBPM Math.round (metronome.bpm * f)
     cb()
 
 vorpal.command 'tapwindow [window]'
@@ -117,8 +140,10 @@ vorpal.command 'tapwindow [window]'
     unless args.window?
       logger.info "window: #{avg}"
       return cb()
-    avg = args.window
-    bpm = new onetwoeight avg, tol
+    expectInt args.window, (w)->
+      avg = w
+      bpm = new onetwoeight avg, tol
+      logger.confirm "set tapwindow to #{w}"
     cb()
 
 vorpal.command 'taptolerance [tolerance]'
@@ -127,24 +152,23 @@ vorpal.command 'taptolerance [tolerance]'
     unless args.tolerance?
       logger.info "tolerance: #{tol}"
       return cb()
-    tol = args.tolerance
-    bpm = new onetwoeight avg, tol
+    expectFloat args.tolerance, (t) ->
+      tol = t
+      bpm = new onetwoeight avg, tol
+      logger.confirm "set taptolerance to #{t}"
     cb()
 
 vorpal.catch '[input...]'
   .action (args, cb) ->
     if args.input? and args.input.length = 1
-      bpm = parseInt args.input[0]
-      if bpm > 0
-        metronome.setBPM bpm
-        return cb()
-
+      expectInt args.input[0], (b) ->
+        metronome.setBPM b
+      return cb()
     vorpal.exec 'help'
     cb()
 
 vorpal.on 'keypress', (data) ->
   if data?
-    logger.debug data
     if data.e.key.ctrl and data.e.key.name is 'p'
       if metronome.mode is 'idle'
         metronome.start()
