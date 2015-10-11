@@ -2,35 +2,7 @@ vorpal = (require 'vorpal')()
 vorpalLog = require 'vorpal-log'
 chalk = require 'chalk'
 
-metronome =
-  mode: 'idle'
-  bpm: 120
-  silent: false
-  start: () ->
-    changed = metronome.mode isnt 'running'
-    metronome.mode = 'running'
-    vorpal.updateDelimiter() if changed
-    logger.confirm 'started metronome'
-  stop: () ->
-    changed = metronome.mode isnt 'idle'
-    metronome.mode = 'idle'
-    vorpal.updateDelimiter() if changed
-    logger.confirm 'stopped metronome'
-  mute: () ->
-    changed = not metronome.silent
-    metronome.silent = true
-    vorpal.updateDelimiter() if changed
-    logger.confirm 'muted sound'
-  unmute: () ->
-    changed = metronome.silent
-    metronome.silent = false
-    vorpal.updateDelimiter() if changed
-    logger.confirm 'unmuted sound'
-  setBPM: (bpm) ->
-    changed = metronome.bpm isnt bpm
-    metronome.bpm = bpm
-    vorpal.updateDelimiter() if changed
-    logger.confirm "set bpm to #{bpm}"
+metronome = (require './metronome')()
 
 vorpal.updateDelimiter = ->
   tempoInfo = "#{Math.round metronome.bpm}"
@@ -47,6 +19,26 @@ vorpal.updateDelimiter = ->
   delText = chalk.dim delText if metronome.silent
 
   return @delimiter delText
+
+metronome.eventEmitter.on 'started', ->
+  vorpal.updateDelimiter()
+  logger.confirm 'started metronome'
+
+metronome.eventEmitter.on 'stopped', ->
+  vorpal.updateDelimiter()
+  logger.confirm 'stopped metronome'
+
+metronome.eventEmitter.on 'muted', ->
+  vorpal.updateDelimiter()
+  logger.confirm 'muted sound'
+
+metronome.eventEmitter.on 'unmuted', ->
+  vorpal.updateDelimiter()
+  logger.confirm 'unmuted sound'
+
+metronome.eventEmitter.on 'bpm', (bpm) ->
+    vorpal.updateDelimiter()
+    logger.confirm "changed bpm to #{bpm}"
 
 vorpal.use vorpalLog, {markdown: true}
   .updateDelimiter()
