@@ -3,9 +3,7 @@
   "version": "0.0.2",
   "description": "Play at given bpm or tap for tempo.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepublish": "npm run compile",
-    "compile": "coffee --compile *.coffee"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -24,7 +22,7 @@
   "homepage": "https://github.com/AljoschaMeyer/metronome-cli#readme",
   "preferGlobal": true,
   "bin": {
-    "metronome": "index.js"
+    "metronome": "bin/index.js"
   },
   "devDependencies": {
     "coffee-script": "^1.10.0"
