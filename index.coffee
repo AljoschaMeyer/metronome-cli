@@ -37,8 +37,11 @@ metronome.eventEmitter.on 'unmuted', ->
   logger.confirm 'unmuted sound'
 
 metronome.eventEmitter.on 'bpm', (bpm) ->
-    vorpal.updateDelimiter()
-    logger.confirm "changed bpm to #{bpm}"
+  vorpal.updateDelimiter()
+  logger.confirm "changed bpm to #{bpm}"
+
+metronome.eventEmitter.on 'tick', ->
+  logger.log 'tick'
 
 vorpal.use vorpalLog, {markdown: true}
   .updateDelimiter()

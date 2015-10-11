@@ -6,12 +6,13 @@ module.exports = () ->
   start = ->
     changed = metronome.mode isnt 'running'
     metronome.mode = 'running'
-    #clearInterval metronome.intervalObject if metronome.intervalObject?
-    #metronome.intervalObject = setInterval onMetronomeTick, ((60 / metronome.bpm) * 1000), metronome.bpm
-    eventEmitter.emit 'started' if changed
+    if changed
+      eventEmitter.emit 'started'
+      intervalObject = setInterval onTick, ((60 / metronome.bpm) * 1000), metronome.bpm
   stop = ->
     changed = metronome.mode isnt 'idle'
     metronome.mode = 'idle'
+    clearInterval intervalObject
     eventEmitter.emit 'stopped' if changed
   mute = ->
     changed = not metronome.silent
@@ -25,6 +26,13 @@ module.exports = () ->
     changed = metronome.bpm isnt bpm
     metronome.bpm = bpm
     eventEmitter.emit 'bpm', bpm if changed
+
+  onTick = (expectedBPM) ->
+    eventEmitter.emit 'tick'
+    if expectedBPM isnt metronome.bpm
+      clearInterval intervalObject
+
+      intervalObject = setInterval onTick, ((60 / metronome.bpm) * 1000), metronome.bpm      
 
   return metronome =
     eventEmitter: eventEmitter
