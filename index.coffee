@@ -93,3 +93,14 @@ vorpal.command 'mul <factor>'
   .action (args, cb) ->
     metronome.setBPM(metronome.bpm * args.factor)
     cb()
+
+vorpal.catch '[input...]'
+  .action (args, cb) ->
+    if args.input? and args.input.length = 1
+      bpm = parseInt args.input[0]
+      if bpm > 0
+        metronome.setBPM bpm
+        return cb()
+
+    vorpal.exec 'help'
+    cb()
