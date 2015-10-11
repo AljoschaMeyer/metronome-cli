@@ -58,10 +58,13 @@ vorpal.command 'stop'
     metronome.stop()
     cb()
 
-vorpal.command 'freq <frequency>'
+vorpal.command 'freq [frequency]'
   .description 'set the pitch'
   .alias 'frequency'
   .action (args, cb) ->
+    unless args.frequency?
+      logger.info "frequency: #{freq}"
+      return cb()
     freq = args.frequency
     cb()
 
@@ -77,15 +80,21 @@ vorpal.command 'tone [frequency] [seconds]'
     sound f, dur
     cb()
 
-vorpal.command 'meter <meter>'
+vorpal.command 'meter [meter]'
   .description 'set the current meter'
   .action (args, cb) ->
+    unless args.meter?
+      logger.info "meter: #{metronome.meter}"
+      return cb()
     metronome.setMeter args.meter
     cb()
 
-vorpal.command 'bpm <bpm>'
+vorpal.command 'bpm [bpm]'
   .description 'set the current bpm'
   .action (args, cb) ->
+    unless args.bpm?
+      loggerole.info "bpm: #{metronome.bpm}"
+      return cb()
     metronome.setBPM args.bpm
     cb()
 
@@ -102,16 +111,22 @@ vorpal.command 'mul <factor>'
     metronome.setBPM(metronome.bpm * args.factor)
     cb()
 
-vorpal.command 'tapwindow <window>'
+vorpal.command 'tapwindow [window]'
   .description 'how many of the last tabs are used when tapping a tempo'
   .action (args, cb) ->
+    unless args.window?
+      logger.info "window: #{avg}"
+      return cb()
     avg = args.window
     bpm = new onetwoeight avg, tol
     cb()
 
-vorpal.command 'taptolerance <tolerance>'
+vorpal.command 'taptolerance [tolerance]'
   .description 'tolerance when tapping a tempo'
   .action (args, cb) ->
+    unless args.tolerance?
+      logger.info "tolerance: #{tol}"
+      return cb()
     tol = args.tolerance
     bpm = new onetwoeight avg, tol
     cb()

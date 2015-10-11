@@ -8,14 +8,14 @@ Tap for bpm, or set set bpm directly and play them.
 
 - `start` alias `play`: starts the metronome
 - `stop` alias `end`: stops the metronome
-- `bpm <bpm>`: set the current bpm
+- `bpm <bpm>`: set or print the current bpm
 - `add` <bpm>: add to the current bpm
 - `mul <factor>` alias `multiply <factor>`: multiply the current bpm with factor
-- `meter <meter>`: set the meter, the first tone of a meter is played higher
-- `freq <frequency>` alias `frequency <frequency>`: set the pitch to use
+- `meter <meter>`: set or print the meter, the first tone of a meter is played higher
+- `freq <frequency>` alias `frequency <frequency>`: set or print the pitch to use
 - `tone [frequency] [seconds]`: play the current or given frequency
-- `tapwindow [window]`: integer which specifies how many of the last taps should be used when setting bpm by tapping
-- `taptolerance`: factor that determines when tapping stopped when setting bpm by tapping
+- `tapwindow [window]`: set or print the integer which specifies how many of the last taps should be used when setting bpm by tapping
+- `taptolerance`: set or print the factor that determines when tapping stopped when setting bpm by tapping
   - example: when tapping at 60 bpm with tolerance of 0.5, tempo resets if you don't tap for (60sec/60bpm)\*((1 + 0.5)bpm) = 1.5 sec, or if you tap to fast (twice in (60sec/60bpm)\*((1 - 0.5)bpm) = 0.5 sec)
 
 Bpm will be set automatically by tapping `space` while holding `ctrl`.
@@ -27,7 +27,3 @@ Shortcuts:
   - writing an integer without any command sets the bpm to that integer
 
 - TODO read args as ints
-- TODO freq without arg to print frequency
-- TODO meter without arg to print meter
-- TODO tapwindow without arg to print tapwindow
-- TODO taptolerance without arg to print taptolerance
