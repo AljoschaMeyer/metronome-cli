@@ -14,14 +14,6 @@ module.exports = () ->
     metronome.mode = 'idle'
     clearInterval intervalObject
     eventEmitter.emit 'stopped' if changed
-  mute = ->
-    changed = not metronome.silent
-    metronome.silent = true
-    eventEmitter.emit 'muted' if changed
-  unmute = ->
-    changed = metronome.silent
-    metronome.silent = false
-    eventEmitter.emit 'unmuted' if changed
   setBPM = (bpm) ->
     changed = metronome.bpm isnt bpm
     metronome.bpm = bpm
@@ -48,11 +40,8 @@ module.exports = () ->
     eventEmitter: eventEmitter
     mode: 'idle'
     bpm: 120
-    silent: false
     meter: 1
     start: start
     stop: stop
-    mute: mute
-    unmute: unmute
     setBPM: setBPM
     setMeter: setMeter

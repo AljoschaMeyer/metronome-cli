@@ -8,8 +8,6 @@ Tap for bpm, or set set bpm directly and play them.
 
 - `start` alias `play`: starts the metronome
 - `stop` alias `end`: stops the metronome
-- `mute`: turn off sound
-- `unmute`: `turn on sound`
 - `bpm <bpm>`: set the current bpm
 - `add` <bpm>: add to the current bpm
 - `mul <factor>` alias `multiply <factor>`: multiply the current bpm with factor
@@ -24,7 +22,6 @@ Tap for bpm, or set set bpm directly and play them.
 
 Shortcuts:
   - use `ctrl + p` to toggle playing
-  - use `ctrl + s` to toggle sound
   - use `ctrl + arrow_left` and `ctrl + arrow_right` to decrement/increment bpm
   - use `alt + arrow_left` and `alt + arrow_right` to decrement/increment bpm by 4
   - writing an integer without any command sets the bpm to that integer

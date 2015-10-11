@@ -10,14 +10,10 @@ vorpal.updateDelimiter = ->
   while tempoInfo.length < 3
     tempoInfo = " #{tempoInfo}"
 
-  muteInfo = ''
-  muteInfo = chalk.bold.red ' M' if metronome.silent
-
   modeInfo = ''
   modeInfo = ' tap' if metronome.mode is 'tap'
 
-  delText = "[#{tempoInfo}#{muteInfo}#{modeInfo}]:"
-  delText = chalk.dim delText if metronome.silent
+  delText = "[#{tempoInfo}#{modeInfo}]:"
 
   return @delimiter delText
 
@@ -28,14 +24,6 @@ metronome.eventEmitter.on 'started', ->
 metronome.eventEmitter.on 'stopped', ->
   vorpal.updateDelimiter()
   logger.confirm 'stopped metronome'
-
-metronome.eventEmitter.on 'muted', ->
-  vorpal.updateDelimiter()
-  logger.confirm 'muted sound'
-
-metronome.eventEmitter.on 'unmuted', ->
-  vorpal.updateDelimiter()
-  logger.confirm 'unmuted sound'
 
 metronome.eventEmitter.on 'bpm', (bpm) ->
   vorpal.updateDelimiter()
@@ -67,18 +55,6 @@ vorpal.command 'stop'
   .alias 'end'
   .action (args, cb) ->
     metronome.stop()
-    cb()
-
-vorpal.command 'unmute'
-  .description 'unmute the sound'
-  .action (args, cb) ->
-    metronome.unmute()
-    cb()
-
-vorpal.command 'mute'
-  .description 'mute the sound'
-  .action (args, cb) ->
-    metronome.mute()
     cb()
 
 vorpal.command 'freq <frequency>'
@@ -127,12 +103,7 @@ vorpal.catch '[input...]'
 vorpal.on 'keypress', (data) ->
   if data?
     logger.debug data
-    if data.e.key.ctrl and data.e.key.name is 's'
-      if metronome.silent
-        metronome.unmute()
-      else
-        metronome.mute()
-    else if data.e.key.ctrl and data.e.key.name is 'p'
+    if data.e.key.ctrl and data.e.key.name is 'p'
       if metronome.mode is 'idle'
         metronome.start()
       else if metronome.mode is 'running'
@@ -148,6 +119,6 @@ vorpal.on 'keypress', (data) ->
 
 logger.info '# Welcome to metronome-cli'
 logger.info 'run `help` for a overview of the available commands'
-logger.info 'protip: `ctrl + p` toggles playing, `ctrl + s` toggles silent mode'
+logger.info 'protip: `ctrl + p` toggles playing'
 logger.info 'protip#2: use `<ctrl | alt> + <arrow_left | arrow_right>` to add or subtract from the current bpm'
 logger.info 'protip#3: just enter any number to set bpm without needing a command'
