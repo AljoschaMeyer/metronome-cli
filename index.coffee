@@ -112,6 +112,7 @@ vorpal.catch '[input...]'
 
 vorpal.on 'keypress', (data) ->
   if data?
+    logger.debug data
     if data.e.key.ctrl and data.e.key.name is 's'
       if metronome.silent
         metronome.unmute()
@@ -122,8 +123,17 @@ vorpal.on 'keypress', (data) ->
         metronome.start()
       else if metronome.mode is 'running'
         metronome.stop()
+    else if data.e.key.ctrl and data.e.key.name is 'left'
+      metronome.setBPM(metronome.bpm - 1)
+    else if data.e.key.ctrl and data.e.key.name is 'right'
+      metronome.setBPM(metronome.bpm + 1)
+    else if data.e.key.meta and data.e.key.name is 'left'
+      metronome.setBPM(metronome.bpm - 4)
+    else if data.e.key.meta and data.e.key.name is 'right'
+      metronome.setBPM(metronome.bpm + 4)
 
 logger.info '# Welcome to metronome-cli'
 logger.info 'run `help` for a overview of the available commands'
 logger.info 'protip: `ctrl + p` toggles playing, `ctrl + s` toggles silent mode'
-logger.info 'protip#2: just enter any number to set bpm without needing a command'
+logger.info 'protip#2: use `<ctrl | alt> + <arrow_left | arrow_right>` to add or subtract from the current bpm'
+logger.info 'protip#3: just enter any number to set bpm without needing a command'

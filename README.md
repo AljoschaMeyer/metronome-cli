@@ -23,4 +23,6 @@ Tap for bpm, or set set bpm directly and play them.
 Shortcuts:
   - use `ctrl + p` to toggle playing
   - use `ctrl + s` to toggle sound
+  - use `ctrl + arrow_left` and `ctrl + arrow_right` to decrement/increment bpm
+  - use `alt + arrow_left` and `alt + arrow_right` to decrement/increment bpm by 4
   - writing an integer without any command sets the bpm to that integer
