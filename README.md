@@ -5,7 +5,15 @@ The result of playing around with a few features of [vorpal](https://github.com/
 Tap for bpm, or set set bpm directly and play them.
 Can also play arbitrary sine tones.
 
+## Installation
+
+```bash
+npm install -g metronome-cli
+```
+
 ## Usage
+
+Run `metronome` to start an [immersive session](https://github.com/dthree/vorpal#what-is-an-immersive-cli-app) with the following commands:
 
 - `start` alias `play`: starts the metronome
 - `stop` alias `end`: stops the metronome
