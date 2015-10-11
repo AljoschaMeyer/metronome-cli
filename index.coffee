@@ -25,13 +25,14 @@ expectFloat = (arg, cb) ->
   else
     logger.warn "invalid argument, expected #{arg} to be a nonzero float"
 
-vorpal.updateDelimiter = ->
+delimiterString = () ->
   tempoInfo = "#{Math.round sound.bpm}"
   while tempoInfo.length < 3
     tempoInfo = " #{tempoInfo}"
-  delText = "[bpm: #{tempoInfo}]:"
+  return "[bpm: #{tempoInfo}]:"
 
-  return @delimiter delText
+vorpal.updateDelimiter = ->
+  return @delimiter delimiterString()
 
 startMetronome = () ->
   if sound.runningMetro
@@ -145,6 +146,7 @@ vorpal.command 'bpm [bpm]'
       return cb()
     expectInt args.bpm, (b) ->
       setBPM b
+      vorpal.ui.delimiter delimiterString()
     cb()
 
 vorpal.command 'add <bpm>'
@@ -152,6 +154,7 @@ vorpal.command 'add <bpm>'
   .action (args, cb) ->
     expectInt args.bpm, (b) ->
       setBPM sound.bpm + b
+      vorpal.ui.delimiter delimiterString()
     cb()
 
 vorpal.command 'mul <factor>'
@@ -160,6 +163,7 @@ vorpal.command 'mul <factor>'
   .action (args, cb) ->
     expectFloat args.factor, (f) ->
       setBPM Math.round sound.bpm * f
+      vorpal.ui.delimiter delimiterString()
     cb()
 
 vorpal.command 'tapwindow [window]'
@@ -191,6 +195,7 @@ vorpal.catch '[input...]'
     if args.input? and args.input.length = 1
       expectInt args.input[0], (b) ->
         setBPM b
+        vorpal.ui.delimiter delimiterString()
       return cb()
     vorpal.exec 'help'
     cb()
@@ -204,16 +209,22 @@ vorpal.on 'keypress', (data) ->
         startMetronome()
     else if data.e.key.ctrl and data.e.key.name is 'left'
       setBPM(sound.bpm - 1)
+      vorpal.ui.delimiter delimiterString()
     else if data.e.key.ctrl and data.e.key.name is 'right'
       setBPM(sound.bpm + 1)
+      vorpal.ui.delimiter delimiterString()
     else if data.e.key.meta and data.e.key.name is 'left'
       setBPM(sound.bpm - 4)
+      vorpal.ui.delimiter delimiterString()
     else if data.e.key.meta and data.e.key.name is 'right'
       setBPM(sound.bpm + 4)
+      vorpal.ui.delimiter delimiterString()
     else if data.e.key.ctrl and data.e.key.name is '`'
       bpm.tap()
       newbpm = bpm.bpm()
-      setBPM newbpm if newbpm?
+      if newbpm?
+        setBPM newbpm
+        vorpal.ui.delimiter delimiterString()
 
 logger.info '# Welcome to metronome-cli'
 logger.info 'run `help` for a overview of the available commands'
