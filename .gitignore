@@ -1,4 +1,4 @@
-index.js
+*.js
 
 # from https://raw.githubusercontent.com/github/gitignore/master/Node.gitignore
 # Logs

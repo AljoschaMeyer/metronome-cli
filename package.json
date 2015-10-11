@@ -1,12 +1,12 @@
 {
   "name": "metronome-cli",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Play at given bpm or tap for tempo.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublish": "npm run compile",
-    "compile": "coffee --compile index.coffee"
+    "compile": "coffee --compile *.coffee"
   },
   "repository": {
     "type": "git",
