@@ -28,13 +28,17 @@ metronome =
     logger.confirm "set bpm to #{bpm}"
 
 vorpal.updateDelimiter = ->
+  tempoInfo = "#{Math.round metronome.bpm}"
+  while tempoInfo.length < 3
+    tempoInfo = " #{tempoInfo}"
+
   muteInfo = ''
   muteInfo = chalk.bold.red ' M' if metronome.silent
 
   modeInfo = ''
   modeInfo = ' tap' if metronome.mode is 'tap'
 
-  delText = "[#{metronome.bpm}#{muteInfo}#{modeInfo}]:"
+  delText = "[#{tempoInfo}#{muteInfo}#{modeInfo}]:"
   delText = chalk.dim delText if metronome.silent
 
   return @delimiter delText
