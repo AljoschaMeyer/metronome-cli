@@ -49,10 +49,6 @@
     return "[bpm: " + tempoInfo + "]:";
   };
 
-  vorpal.updateDelimiter = function() {
-    return this.delimiter(delimiterString());
-  };
-
   startMetronome = function() {
     if (sound.runningMetro) {
       return logger.error('already playing metronome');
@@ -95,20 +91,25 @@
 
   setBPM = function(bpm) {
     var changed;
-    if (bpm > 440) {
-      bpm = 440;
+    if (bpm > 500) {
+      bpm = 500;
+      logger.warn('can not set bpm higher than 500');
+    }
+    if (bpm < 1) {
+      bpm = 1;
+      logger.warn('can not set bpm lower than 1');
     }
     changed = bpm !== sound.bpm;
     sound.bpm = bpm;
     if (changed) {
-      vorpal.updateDelimiter();
+      vorpal.delimiter(delimiterString());
       return logger.confirm("set bpm to " + bpm);
     }
   };
 
   vorpal.use(vorpalLog, {
     markdown: true
-  }).updateDelimiter().show();
+  }).delimiter(delimiterString()).show();
 
   logger = vorpal.logger;
 
@@ -119,6 +120,18 @@
 
   vorpal.command('stop').description('stops the metronome').alias('end').action(function(args, cb) {
     stopMetronome();
+    return cb();
+  });
+
+  vorpal.command('meter [meter]').description('set the current meter').action(function(args, cb) {
+    if (args.meter == null) {
+      logger.info("meter: " + sound.meter);
+      return cb();
+    }
+    expectInt(args.meter, function(m) {
+      sound.meter = m;
+      return logger.confirm("set meter to " + m);
+    });
     return cb();
   });
 
@@ -179,29 +192,26 @@
       return cb();
     }
     expectInt(args.bpm, function(b) {
-      setBPM(b);
-      return vorpal.ui.delimiter(delimiterString());
+      return setBPM(b);
     });
     return cb();
   });
 
   vorpal.command('add <bpm>').description('add to the current bpm').action(function(args, cb) {
     expectInt(args.bpm, function(b) {
-      setBPM(sound.bpm + b);
-      return vorpal.ui.delimiter(delimiterString());
+      return setBPM(sound.bpm + b);
     });
     return cb();
   });
 
   vorpal.command('mul <factor>').description('multiply the current bpm with the factor').alias('multiply').action(function(args, cb) {
     expectFloat(args.factor, function(f) {
-      setBPM(Math.round(sound.bpm * f));
-      return vorpal.ui.delimiter(delimiterString());
+      return setBPM(Math.round(sound.bpm * f));
     });
     return cb();
   });
 
-  vorpal.command('tapwindow [window]').description('how many of the last tabs are used when tapping a tempo').action(function(args, cb) {
+  vorpal.command('tapwindow [window]').description('how many of the last taps are used when tapping a tempo').action(function(args, cb) {
     if (args.window == null) {
       logger.info("window: " + avg);
       return cb();
@@ -230,8 +240,7 @@
   vorpal["catch"]('[input...]').action(function(args, cb) {
     if ((args.input != null) && (args.input.length = 1)) {
       expectInt(args.input[0], function(b) {
-        setBPM(b);
-        return vorpal.ui.delimiter(delimiterString());
+        return setBPM(b);
       });
       return cb();
     }
@@ -274,6 +283,8 @@
   logger.info('# Welcome to metronome-cli');
 
   logger.info('run `help` for a overview of the available commands');
+
+  logger.info('tap `space` while holding `ctrl` to set bpm');
 
   logger.info('protip: `ctrl + p` toggles playing');
 
