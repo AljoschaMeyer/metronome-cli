@@ -31,9 +31,6 @@ delimiterString = () ->
     tempoInfo = " #{tempoInfo}"
   return "[bpm: #{tempoInfo}]:"
 
-vorpal.updateDelimiter = ->
-  return @delimiter delimiterString()
-
 startMetronome = () ->
   if sound.runningMetro
     logger.error 'already playing metronome'
@@ -69,11 +66,11 @@ setBPM = (bpm) ->
   changed = bpm isnt sound.bpm
   sound.bpm = bpm
   if changed
-    vorpal.updateDelimiter()
+    vorpal.delimiter delimiterString()
     logger.confirm "set bpm to #{bpm}"
 
 vorpal.use vorpalLog, {markdown: true}
-  .updateDelimiter()
+  .delimiter delimiterString()
   .show()
 
 logger = vorpal.logger
@@ -146,7 +143,6 @@ vorpal.command 'bpm [bpm]'
       return cb()
     expectInt args.bpm, (b) ->
       setBPM b
-      vorpal.ui.delimiter delimiterString()
     cb()
 
 vorpal.command 'add <bpm>'
@@ -154,7 +150,6 @@ vorpal.command 'add <bpm>'
   .action (args, cb) ->
     expectInt args.bpm, (b) ->
       setBPM sound.bpm + b
-      vorpal.ui.delimiter delimiterString()
     cb()
 
 vorpal.command 'mul <factor>'
@@ -163,7 +158,6 @@ vorpal.command 'mul <factor>'
   .action (args, cb) ->
     expectFloat args.factor, (f) ->
       setBPM Math.round sound.bpm * f
-      vorpal.ui.delimiter delimiterString()
     cb()
 
 vorpal.command 'tapwindow [window]'
@@ -195,7 +189,6 @@ vorpal.catch '[input...]'
     if args.input? and args.input.length = 1
       expectInt args.input[0], (b) ->
         setBPM b
-        vorpal.ui.delimiter delimiterString()
       return cb()
     vorpal.exec 'help'
     cb()
