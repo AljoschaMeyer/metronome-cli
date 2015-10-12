@@ -161,7 +161,7 @@ vorpal.command 'mul <factor>'
     cb()
 
 vorpal.command 'tapwindow [window]'
-  .description 'how many of the last tabs are used when tapping a tempo'
+  .description 'how many of the last taps are used when tapping a tempo'
   .action (args, cb) ->
     unless args.window?
       logger.info "window: #{avg}"
@@ -221,6 +221,7 @@ vorpal.on 'keypress', (data) ->
 
 logger.info '# Welcome to metronome-cli'
 logger.info 'run `help` for a overview of the available commands'
+logger.info 'tap `space` while holding `ctrl` to set bpm'
 logger.info 'protip: `ctrl + p` toggles playing'
 logger.info 'protip#2: use `<ctrl | alt> + <arrow_left | arrow_right>` to add or subtract from the current bpm'
 logger.info 'protip#3: just enter any number to set bpm without needing a command'

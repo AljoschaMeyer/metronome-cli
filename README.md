@@ -15,6 +15,8 @@ npm install -g metronome-cli
 
 Run `metronome` to start an [immersive session](https://github.com/dthree/vorpal#what-is-an-immersive-cli-app) with the following commands:
 
+Tapping `space` while holding `ctrl` will set the bpm.
+
 - `start` alias `play`: starts the metronome
 - `stop` alias `end`: stops the metronome
 - `bpm <bpm>`: set or print the current bpm
@@ -26,8 +28,6 @@ Run `metronome` to start an [immersive session](https://github.com/dthree/vorpal
 - `taptolerance`: set or print the factor that determines when tapping stopped when setting bpm by tapping
   - example: when tapping at 60 bpm with tolerance of 0.5, tempo resets if you don't tap for (60sec/60bpm)\*((1 + 0.5)bpm) = 1.5 sec, or if you tap to fast (twice in (60sec/60bpm)\*((1 - 0.5)bpm) = 0.5 sec)
 - `length [seconds]`: set or print the length of the metronome ticks
-
-Bpm will be set automatically by tapping `space` while holding `ctrl`.
 
 Shortcuts:
   - use `ctrl + p` to toggle playing
