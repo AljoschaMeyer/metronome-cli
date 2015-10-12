@@ -62,7 +62,12 @@ stopTone = () ->
     logger.confirm 'stopped tone'
 
 setBPM = (bpm) ->
-  bpm = 440 if bpm > 440
+  if bpm > 500
+    bpm = 500
+    logger.warn 'can not set bpm higher than 500'
+  if bpm < 1
+    bpm = 1
+    logger.warn 'can not set bpm lower than 1'
   changed = bpm isnt sound.bpm
   sound.bpm = bpm
   if changed
