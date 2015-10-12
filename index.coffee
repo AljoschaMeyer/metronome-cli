@@ -89,6 +89,17 @@ vorpal.command 'stop'
     stopMetronome()
     cb()
 
+vorpal.command 'meter [meter]'
+  .description 'set the current meter'
+  .action (args, cb) ->
+    unless args.meter?
+      logger.info "meter: #{sound.meter}"
+      return cb()
+    expectInt args.meter, (m) ->
+      sound.meter = m
+      logger.confirm "set meter to #{m}"
+    cb()
+
 vorpal.command 'freq [frequency]'
   .description 'set the pitch'
   .alias 'frequency'

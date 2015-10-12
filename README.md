@@ -22,6 +22,7 @@ Tapping `space` while holding `ctrl` will set the bpm.
 - `bpm <bpm>`: set or print the current bpm
 - `add` <bpm>: add to the current bpm
 - `mul <factor>` alias `multiply <factor>`: multiply the current bpm with factor
+- `meter <meter>`: set or print the meter, the first tone of a meter is played higher
 - `freq <frequency>` alias `frequency <frequency>`: set or print the pitch to use
 - `tone [frequency] [seconds]`: play the current or given frequency
 - `tapwindow [window]`: set or print the integer which specifies how many of the last taps should be used when setting bpm by tapping

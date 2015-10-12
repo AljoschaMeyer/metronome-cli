@@ -18,7 +18,11 @@ sine = Generator {
 metro = Generator {
   generate: (time) ->
     return [0, 0] if (time % (60 / controls.bpm)) > controls.length
-    return [Math.sin(Math.PI * 2 * time * controls.freq), Math.sin(Math.PI * 2 * time * controls.freq)]
+    if (time % (controls.meter / 2)) < 0.5
+      return [Math.sin(Math.PI * 2 * time * controls.freq), Math.sin(Math.PI * 2 * time * controls.freq)]
+    else
+      return [Math.sin(Math.PI * 2 * time * controls.freq / 2), Math.sin(Math.PI * 2 * time * controls.freq / 2)]
+
   duration: Infinity,
   channels: 2,
   sampleRate: 44100,
@@ -57,6 +61,7 @@ module.exports = controls =
   stopMetro: stopMetro
   runningSine: false
   runningMetro: false
-  freq: 440
+  freq: 880
   bpm: 120
   length: 0.1
+  meter: 1
