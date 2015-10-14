@@ -74,7 +74,7 @@ setBPM = (bpm) ->
     vorpal.delimiter delimiterString()
     logger.confirm "set bpm to #{bpm}"
 
-vorpal.use vorpalLog, {markdown: true}
+vorpal.use vorpalLog
   .delimiter delimiterString()
   .show()
 
@@ -235,9 +235,9 @@ vorpal.on 'keypress', (data) ->
         setBPM newbpm
         vorpal.ui.delimiter delimiterString()
 
-logger.info '# Welcome to metronome-cli'
-logger.info 'run `help` for a overview of the available commands'
-logger.info 'tap `space` while holding `ctrl` to set bpm'
-logger.info 'protip: `ctrl + p` toggles playing'
-logger.info 'protip#2: use `<ctrl | alt> + <arrow_left | arrow_right>` to add or subtract from the current bpm'
+logger.info chalk.bold.magenta 'Welcome to metronome-cli'
+logger.info "run #{chalk.yellow 'help'} for a overview of the available commands"
+logger.info "tap #{chalk.yellow 'space'} while holding #{chalk.yellow 'ctrl'} to set bpm"
+logger.info "protip: #{chalk.yellow 'ctrl + p'} toggles playing"
+logger.info "protip#2: use #{chalk.yellow '<ctrl | alt> + <arrow_left | arrow_right>'} to add or subtract from the current bpm"
 logger.info 'protip#3: just enter any number to set bpm without needing a command'

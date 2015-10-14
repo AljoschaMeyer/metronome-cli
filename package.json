@@ -33,6 +33,6 @@
     "onetwoeight": "0.0.1",
     "speaker": "^0.2.6",
     "vorpal": "^1.3.9",
-    "vorpal-log": "0.0.3"
+    "vorpal-log": "1.0.0"
   }
 }
