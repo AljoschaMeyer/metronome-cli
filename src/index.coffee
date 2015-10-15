@@ -18,7 +18,6 @@ expectInt = (arg) ->
   if int? and int > 0
     return int
   else
-    logger.warn "invalid argument, expected #{arg} to be a nonzero, positive integer"
     return null
 
 expectFloat = (arg) ->
@@ -26,7 +25,6 @@ expectFloat = (arg) ->
   if arg? and (not isNaN flt) and (flt isnt 0)
     return flt
   else
-    logger.warn "invalid argument, expected #{arg} to be a nonzero float"
     return null
 
 delimiterString = () ->
@@ -211,3 +209,13 @@ logger.info "tap #{chalk.yellow 'space'} while holding #{chalk.yellow 'ctrl'} to
 logger.info "protip: #{chalk.yellow 'ctrl + p'} toggles playing"
 logger.info "protip#2: use #{chalk.yellow '<ctrl | alt> + <arrow_left | arrow_right>'} to add or subtract from the current bpm"
 logger.info 'protip#3: just enter any number to set bpm without needing a command'
+
+# for testability
+module.exports =
+  startMetronome: startMetronome
+  stopMetronome: stopMetronome
+  startTone: startTone
+  stopTone: stopTone
+  setBPM: setBPM
+  expectInt: expectInt
+  expectFloat: expectFloat
