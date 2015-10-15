@@ -122,6 +122,7 @@ vorpal.command 'tone [frequency] [seconds]'
       cb()
 
 sop.command 'meter', sound, {validate: expectInt}
+  .hidden()
 sop.command 'freq', sound, {validate: expectInt}
 sop.command 'length', sound, {validate: expectFloat}
 sop.command 'bpm', sound, {
