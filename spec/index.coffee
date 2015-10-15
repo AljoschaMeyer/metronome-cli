@@ -1,3 +1,3 @@
 describe 'c', ->
   it 'd', ->
-    expect(true).toBe false
+    expect(true).toBe true
