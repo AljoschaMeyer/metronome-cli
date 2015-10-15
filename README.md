@@ -1,5 +1,7 @@
 # Metronome-CLI
 
+[![Build Status](https://travis-ci.org/AljoschaMeyer/metronome-cli.svg)](https://travis-ci.org/AljoschaMeyer/metronome-cli)
+
 The result of playing around with a few features of [vorpal](https://github.com/dthree/vorpal), but also a useful cli utility.
 
 Tap for bpm, or set set bpm directly and play them.
