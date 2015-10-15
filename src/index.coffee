@@ -87,14 +87,14 @@ vorpal.command 'start'
   .description 'start the metronome'
   .alias 'play'
   .action (args, cb) ->
-    startMetronome()
+    metronome.startMetronome()
     cb()
 
 vorpal.command 'stop'
   .description 'stops the metronome'
   .alias 'end'
   .action (args, cb) ->
-    stopMetronome()
+    metronome.stopMetronome()
     cb()
 
 vorpal.command 'tone [frequency] [seconds]'
@@ -134,7 +134,7 @@ vorpal.command 'add <bpm>'
   .description 'add to the current bpm'
   .action (args, cb) ->
     b = expectInt args.bpm
-    setBPM sound.bpm + b unless b is null
+    metronome.setBPM sound.bpm + b unless b is null
     cb()
 
 vorpal.command 'mul <factor>'
@@ -142,7 +142,7 @@ vorpal.command 'mul <factor>'
   .alias 'multiply'
   .action (args, cb) ->
     f = expectFloat args.factor
-    setBPM Math.round sound.bpm * f unless f is null
+    metronome.setBPM Math.round sound.bpm * f unless f is null
     cb()
 
 sop.command 'tapwindow', settings, {
@@ -204,7 +204,7 @@ logger.info "protip#2: use #{chalk.yellow '<ctrl | alt> + <arrow_left | arrow_ri
 logger.info 'protip#3: just enter any number to set bpm without needing a command'
 
 # for testability
-module.exports =
+module.exports = metronome =
   startMetronome: startMetronome
   stopMetronome: stopMetronome
   startTone: startTone
@@ -212,3 +212,4 @@ module.exports =
   setBPM: setBPM
   expectInt: expectInt
   expectFloat: expectFloat
+  vorpal: vorpal

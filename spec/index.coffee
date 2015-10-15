@@ -143,3 +143,31 @@ describe 'The expectFloat function', ->
 
   it 'parses numeric strings', ->
     expect(metronome.expectFloat '-2.7').toBe -2.7
+
+describe 'The start command', ->
+  it 'runs startMetronome()', ->
+    spyOn metronome, 'startMetronome'
+    metronome.vorpal.exec 'start', (err, data) ->
+      expect(metronome.startMetronome.calls.length).toBe 1
+
+describe 'The stop command', ->
+  it 'runs stopMetronome()', ->
+    spyOn metronome, 'stopMetronome'
+    metronome.vorpal.exec 'stop', (err, data) ->
+      expect(metronome.stopMetronome.calls.length).toBe 1
+
+describe 'The add command', ->
+  it 'adds to the bpm', ->
+    oldBPM = sound.bpm
+    spyOn metronome, 'setBPM'
+    metronome.vorpal.exec 'add 5', (err, data) ->
+      expect(metronome.setBPM.mostRecentCall.args[0]).toBe(oldBPM + 5)
+
+describe 'The mul command', ->
+  it 'multiplies the bpm', ->
+    metronome.setBPM 120
+    oldBPM = sound.bpm
+    console.log oldBPM
+    spyOn metronome, 'setBPM'
+    metronome.vorpal.exec 'mul 1.1', (err, data) ->
+      expect(metronome.setBPM.mostRecentCall.args[0]).toBe(oldBPM * 1.1)
