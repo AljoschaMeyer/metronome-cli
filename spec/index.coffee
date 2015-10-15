@@ -31,6 +31,20 @@ describe 'The startMetronome function', ->
     expect(sound.stopSine).toHaveBeenCalled()
     expect(sound.startMetro).toHaveBeenCalled()
 
+describe 'The stopMetronome function', ->
+  beforeEach ->
+    metronome.stopTone()
+    metronome.stopMetronome()
+
+  it 'calls sound.stopMetro only if sound.runningMetro', ->
+    expect(sound.runningMetro).toBe false
+    spyOn sound, 'stopMetro'
+    metronome.stopMetronome()
+    expect(sound.stopMetro).not.toHaveBeenCalled()
+    sound.runningMetro = true
+    metronome.stopMetronome()
+    expect(sound.stopMetro).toHaveBeenCalled()
+
 describe 'The startTone function', ->
   beforeEach ->
     metronome.stopTone()
@@ -60,6 +74,20 @@ describe 'The startTone function', ->
     metronome.startTone()
     expect(sound.stopMetro).toHaveBeenCalled()
     expect(sound.startSine).toHaveBeenCalled()
+
+describe 'The stopTone function', ->
+  beforeEach ->
+    metronome.stopTone()
+    metronome.stopMetronome()
+
+  it 'calls sound.stopSine only if sound.runningSine', ->
+    expect(sound.runningSine).toBe false
+    spyOn sound, 'stopSine'
+    metronome.stopTone()
+    expect(sound.stopSine).not.toHaveBeenCalled()
+    sound.runningSine = true
+    metronome.stopTone()
+    expect(sound.stopSine).toHaveBeenCalled()
 
 describe 'The expectInt function', ->
   it 'does not accept strings', ->
