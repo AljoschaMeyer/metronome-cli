@@ -1,4 +1,65 @@
 metronome = require '../src/index'
+sound = require '../src/sound'
+
+describe 'The startMetronome function', ->
+  beforeEach ->
+    metronome.stopTone()
+    metronome.stopMetronome()
+
+  it 'calls sound.startMetro if it wasn\'t playing already', ->
+    spyOn sound, 'startMetro'
+    expect(sound.runningMetro).toBe false
+    metronome.startMetronome()
+    expect(sound.startMetro).toHaveBeenCalled()
+
+  it 'does not call sound.startMetro if it was already playing', ->
+    expect(sound.runningMetro).toBe false
+    metronome.startMetronome()
+    expect(sound.runningMetro).toBe true
+    spyOn sound, 'startMetro'
+    metronome.startMetronome()
+    expect(sound.startMetro).not.toHaveBeenCalled()
+
+  it 'calls sound.stopSine and sound.startMetro if a sine tone was playing', ->
+    expect(sound.runningMetro).toBe false
+    expect(sound.runningSine).toBe false
+    metronome.startTone()
+    expect(sound.runningSine).toBe true
+    spyOn sound, 'stopSine'
+    spyOn sound, 'startMetro'
+    metronome.startMetronome()
+    expect(sound.stopSine).toHaveBeenCalled()
+    expect(sound.startMetro).toHaveBeenCalled()
+
+describe 'The startTone function', ->
+  beforeEach ->
+    metronome.stopTone()
+    metronome.stopMetronome()
+
+  it 'calls sound.startSine if it wasn\'t playing already', ->
+    spyOn sound, 'startSine'
+    expect(sound.runningSine).toBe false
+    metronome.startTone()
+    expect(sound.startSine).toHaveBeenCalled()
+
+  it 'does not call sound.startSine if it was already playing', ->
+    expect(sound.runningSine).toBe false
+    metronome.startTone()
+    expect(sound.runningSine).toBe true
+    spyOn sound, 'startSine'
+    metronome.startTone()
+    expect(sound.startSine).not.toHaveBeenCalled()
+
+  it 'calls sound.stopMetro and sound.startSine if the metronome was playing', ->
+    expect(sound.runningMetro).toBe false
+    expect(sound.runningSine).toBe false
+    metronome.startMetronome()
+    expect(sound.runningMetro).toBe true
+    spyOn sound, 'stopMetro'
+    spyOn sound, 'startSine'
+    metronome.startTone()
+    expect(sound.stopMetro).toHaveBeenCalled()
+    expect(sound.startSine).toHaveBeenCalled()
 
 describe 'The expectInt function', ->
   it 'does not accept strings', ->
