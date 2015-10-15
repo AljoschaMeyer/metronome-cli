@@ -1,5 +1,6 @@
 metronome = require '../src/index'
 sound = require '../src/sound'
+parse = require 'note-parser'
 
 describe 'The startMetronome function', ->
   beforeEach ->
@@ -143,6 +144,31 @@ describe 'The expectFloat function', ->
 
   it 'parses numeric strings', ->
     expect(metronome.expectFloat '-2.7').toBe -2.7
+
+describe 'The expectFrequency function', ->
+  it 'does not accept negative integers', ->
+    expect(metronome.expectFrequency -1).toBeNull()
+
+  it 'does not accept zero', ->
+    expect(metronome.expectFrequency 0).toBeNull()
+
+  it 'accepts integers', ->
+    expect(metronome.expectFrequency 5).toBe 5
+
+  it 'accepts numbers and rounds them down', ->
+    expect(metronome.expectFrequency 7.49).toBe 7
+    expect(metronome.expectFrequency 7.99).toBe 7
+
+  it 'parses numeric strings', ->
+    expect(metronome.expectFrequency '6').toBe 6
+
+  it 'does not accept non-note strings', ->
+    expect(metronome.expectFrequency 'foo').toBeNull()
+
+  it 'returns the frequency for note strings', ->
+    expect(metronome.expectFrequency 'a').toBe parse('a').freq
+    expect(metronome.expectFrequency 'b#--').toBe parse('b#--').freq
+    expect(metronome.expectFrequency 'ab2').toBe parse('ab2').freq
 
 describe 'The start command', ->
   it 'runs startMetronome()', ->

@@ -31,6 +31,7 @@
   "dependencies": {
     "audio-generator": "^1.0.3",
     "chalk": "^1.1.1",
+    "note-parser": "^0.9.0",
     "onetwoeight": "0.0.1",
     "speaker": "^0.2.6",
     "vorpal": "^1.3.9",

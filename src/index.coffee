@@ -3,6 +3,7 @@ vorpalLog = require 'vorpal-log'
 vorpalSOP = require 'vorpal-setorprint'
 chalk = require 'chalk'
 onetwoeight = require 'onetwoeight'
+parse = require 'note-parser'
 
 sound = require './sound'
 
@@ -25,6 +26,17 @@ expectFloat = (arg) ->
     return flt
   else
     return null
+
+expectFrequency = (arg) ->
+  int = parseInt arg
+  if int? and int > 0
+    return int
+  else
+    try
+      note = parse arg
+      return note.freq
+    catch e
+      return null
 
 delimiterString = () ->
   tempoInfo = "#{Math.round sound.bpm}"
@@ -110,7 +122,7 @@ vorpal.command 'tone [frequency] [seconds]'
       dur = 2
       dur = args.seconds if args.seconds? and (typeof args.seconds) is 'number'
 
-      frequ = expectInt f
+      frequ = expectFrequency f
       unless frequ is null
         sound.freq = frequ
         startTone()
@@ -123,7 +135,8 @@ vorpal.command 'tone [frequency] [seconds]'
 
 sop.command 'meter', sound, {validate: expectInt}
   .hidden()
-sop.command 'freq', sound, {validate: expectInt}
+sop.command 'freq', sound, {validate: expectFrequency}
+  .description 'set or print frequency, accepts integers or note names, e.g. g#5'
 sop.command 'length', sound, {validate: expectFloat}
 sop.command 'bpm', sound, {
   validate: expectInt
@@ -213,4 +226,5 @@ module.exports = metronome =
   setBPM: setBPM
   expectInt: expectInt
   expectFloat: expectFloat
+  expectFrequency: expectFrequency
   vorpal: vorpal

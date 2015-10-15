@@ -22,7 +22,7 @@ Tapping `space` while holding `ctrl` will set the bpm.
 - `bpm <bpm>`: set or print the current bpm
 - `add` <bpm>: add to the current bpm
 - `mul <factor>` alias `multiply <factor>`: multiply the current bpm with factor
-- `freq <frequency>` alias `frequency <frequency>`: set or print the pitch to use
+- `freq <frequency>` alias `frequency <frequency>`: set or print the pitch to use. Accepts written representation of a note, which is parsed using [note-parser](https://www.npmjs.com/package/note-parser)
 - `tone [frequency] [seconds]`: play the current or given frequency
 - `tapwindow [window]`: set or print the integer which specifies how many of the last taps should be used when setting bpm by tapping
 - `taptolerance`: set or print the factor that determines when tapping stopped when setting bpm by tapping
