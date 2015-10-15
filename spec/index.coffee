@@ -89,6 +89,24 @@ describe 'The stopTone function', ->
     metronome.stopTone()
     expect(sound.stopSine).toHaveBeenCalled()
 
+describe 'The setBPM function', ->
+  beforeEach ->
+    sound.bpm = 120
+
+  it 'sets sound.bpm', ->
+    metronome.setBPM 121
+    expect(sound.bpm).toBe 121
+
+  it 'allows a maximum bpm of 500', ->
+    metronome.setBPM 99999
+    expect(sound.bpm).toBe 500
+
+  it 'allows a minimum bpm of 1', ->
+    metronome.setBPM 0
+    expect(sound.bpm).toBe 1
+    metronome.setBPM -2348
+    expect(sound.bpm).toBe 1
+
 describe 'The expectInt function', ->
   it 'does not accept strings', ->
     expect(metronome.expectInt 'foo').toBeNull()
