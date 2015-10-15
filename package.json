@@ -34,6 +34,7 @@
     "onetwoeight": "0.0.1",
     "speaker": "^0.2.6",
     "vorpal": "^1.3.9",
-    "vorpal-log": "1.0.0"
+    "vorpal-log": "1.0.0",
+    "vorpal-setorprint": "^1.0.0"
   }
 }

@@ -7,12 +7,11 @@ onetwoeight = require 'onetwoeight'
 sound = require './sound'
 
 settings =
-  avg: 20
-  tol: 0.5
+  tapwindow: 20
+  taptolerance: 0.5
 
-bpm = new onetwoeight settings.avg, settings.tol
+bpm = new onetwoeight settings.tapwindow, settings.taptolerance
 
-# execute cb if arg can be parsed as nonzero, positive integer, else log
 expectInt = (arg) ->
   int = parseInt arg
   if int? and int > 0
@@ -63,7 +62,7 @@ stopTone = () ->
     sound.stopSine()
     logger.confirm 'stopped tone'
 
-setBPM = (bpm) ->
+setBPM = (bpm, forceConfirmation = false) ->
   if bpm > 500
     bpm = 500
     logger.warn 'can not set bpm higher than 500'
@@ -72,7 +71,7 @@ setBPM = (bpm) ->
     logger.warn 'can not set bpm lower than 1'
   changed = bpm isnt sound.bpm
   sound.bpm = bpm
-  if changed
+  if changed or forceConfirmation
     vorpal.delimiter delimiterString()
     logger.confirm "set bpm to #{bpm}"
 
@@ -122,10 +121,14 @@ vorpal.command 'tone [frequency] [seconds]'
         , dur * 1000, oldFreq
       cb()
 
-sop.addCommand sound, 'meter', expectInt
-sop.addCommand sound, 'freq', expectInt
-sop.addCommand sound, 'length', expectFloat
-sop.addCommand sound, 'bpm', expectInt
+sop.command 'meter', sound, {validate: expectInt}
+sop.command 'freq', sound, {validate: expectInt}
+sop.command 'length', sound, {validate: expectFloat}
+sop.command 'bpm', sound, {
+  validate: expectInt
+  passedValidation: (key, arg, value) ->
+    setBPM value, true
+}
 
 vorpal.command 'add <bpm>'
   .description 'add to the current bpm'
@@ -142,31 +145,21 @@ vorpal.command 'mul <factor>'
     setBPM Math.round sound.bpm * f unless f is null
     cb()
 
-vorpal.command 'tapwindow [window]'
-  .description 'how many of the last taps are used when tapping a tempo'
-  .action (args, cb) ->
-    unless args.window?
-      logger.info "window: #{settings.avg}"
-      return cb()
-    w = expectInt args.window
-    unless w is null
-      settings.avg = w
-      bpm = new onetwoeight settings.avg, settings.tol
-      logger.confirm "set tapwindow to #{w}"
-    cb()
+sop.command 'tapwindow', settings, {
+  validate: expectInt
+  passedValidation: (key, arg, value) ->
+    logger.confirm "set tapwindow to #{arg}"
+    bpm = new onetwoeight settings.tapwindow, settings.taptolerance
+}
+  .description 'set or print how many of the last taps are used when tapping a tempo'
 
-vorpal.command 'taptolerance [tolerance]'
-  .description 'tolerance when tapping a tempo'
-  .action (args, cb) ->
-    unless args.tolerance?
-      logger.info "tolerance: #{settings.tol}"
-      return cb()
-    t = expectFloat args.tolerance
-    unless t is null
-      settings.tol = t
-      bpm = new onetwoeight settings.avg, settings.tol
-      logger.confirm "set taptolerance to #{t}"
-    cb()
+sop.command 'taptolerance', settings, {
+  validate: expectFloat
+  passedValidation: (key, arg, value) ->
+    logger.confirm "set taptolerance to #{arg}"
+    bpm = new onetwoeight settings.tapwindow, settings.taptolerance
+}
+  .description 'set or print tolerance when tapping a tempo'
 
 vorpal.catch '[input...]'
   .action (args, cb) ->
