@@ -1,6 +1,6 @@
 {
   "name": "metronome-cli",
-  "version": "0.0.5",
+  "version": "0.1.0",
   "description": "Play at given bpm or tap for tempo.",
   "scripts": {
     "test": "jasmine-node spec --coffee --matchall"
