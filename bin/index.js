@@ -1,42 +1,61 @@
 #! /usr/bin/env node
 (function() {
-  var avg, bpm, chalk, delimiterString, expectFloat, expectInt, globalFrequency, logger, onetwoeight, setBPM, sound, startMetronome, startTone, stopMetronome, stopTone, tol, vorpal, vorpalLog;
+  var bpm, chalk, delimiterString, expectFloat, expectFrequency, expectInt, logger, metronome, onetwoeight, parse, setBPM, settings, sop, sound, startMetronome, startTone, stopMetronome, stopTone, vorpal, vorpalLog, vorpalSOP;
 
   vorpal = (require('vorpal'))();
 
   vorpalLog = require('vorpal-log');
 
+  vorpalSOP = require('vorpal-setorprint');
+
   chalk = require('chalk');
 
   onetwoeight = require('onetwoeight');
 
+  parse = require('note-parser');
+
   sound = require('./sound');
 
-  avg = 20;
+  settings = {
+    tapwindow: 20,
+    taptolerance: 0.5
+  };
 
-  tol = 0.5;
+  bpm = new onetwoeight(settings.tapwindow, settings.taptolerance);
 
-  bpm = new onetwoeight(avg, tol);
-
-  globalFrequency = 440;
-
-  expectInt = function(arg, cb) {
+  expectInt = function(arg) {
     var int;
     int = parseInt(arg);
     if ((int != null) && int > 0) {
-      return cb(int);
+      return int;
     } else {
-      return logger.warn("invalid argument, expected " + arg + " to be a nonzero, positive integer");
+      return null;
     }
   };
 
-  expectFloat = function(arg, cb) {
+  expectFloat = function(arg) {
     var flt;
     flt = parseFloat(arg);
     if ((arg != null) && (!isNaN(flt)) && (flt !== 0)) {
-      return cb(flt);
+      return flt;
     } else {
-      return logger.warn("invalid argument, expected " + arg + " to be a nonzero float");
+      return null;
+    }
+  };
+
+  expectFrequency = function(arg) {
+    var e, error, int, note;
+    int = parseInt(arg);
+    if ((int != null) && int > 0) {
+      return int;
+    } else {
+      try {
+        note = parse(arg);
+        return note.freq;
+      } catch (error) {
+        e = error;
+        return null;
+      }
     }
   };
 
@@ -89,8 +108,11 @@
     }
   };
 
-  setBPM = function(bpm) {
+  setBPM = function(bpm, forceConfirmation) {
     var changed;
+    if (forceConfirmation == null) {
+      forceConfirmation = false;
+    }
     if (bpm > 500) {
       bpm = 500;
       logger.warn('can not set bpm higher than 500');
@@ -101,70 +123,36 @@
     }
     changed = bpm !== sound.bpm;
     sound.bpm = bpm;
-    if (changed) {
+    if (changed || forceConfirmation) {
       vorpal.delimiter(delimiterString());
       return logger.confirm("set bpm to " + bpm);
     }
   };
 
-  vorpal.use(vorpalLog).delimiter(delimiterString()).show();
+  vorpal.use(vorpalLog).use(vorpalSOP).delimiter(delimiterString()).show();
 
   logger = vorpal.logger;
 
+  sop = vorpal.sop;
+
   vorpal.command('start').description('start the metronome').alias('play').action(function(args, cb) {
-    startMetronome();
+    metronome.startMetronome();
     return cb();
   });
 
   vorpal.command('stop').description('stops the metronome').alias('end').action(function(args, cb) {
-    stopMetronome();
-    return cb();
-  });
-
-  vorpal.command('meter [meter]').description('set the current meter').action(function(args, cb) {
-    if (args.meter == null) {
-      logger.info("meter: " + sound.meter);
-      return cb();
-    }
-    expectInt(args.meter, function(m) {
-      sound.meter = m;
-      return logger.confirm("set meter to " + m);
-    });
-    return cb();
-  });
-
-  vorpal.command('freq [frequency]').description('set the pitch').alias('frequency').action(function(args, cb) {
-    if (args.frequency == null) {
-      logger.info("frequency: " + globalFrequency);
-      return cb();
-    }
-    expectInt(args.frequency, function(f) {
-      globalFrequency = f;
-      sound.freq = f;
-      return logger.confirm("set frequency to " + f);
-    });
-    return cb();
-  });
-
-  vorpal.command('length [seconds]').description('set the length of the metronome ticks').action(function(args, cb) {
-    if (args.seconds == null) {
-      logger.info("length: " + sound.length);
-      return cb();
-    }
-    expectFloat(args.seconds, function(l) {
-      sound.length = l;
-      return logger.confirm("set length to " + l);
-    });
+    metronome.stopMetronome();
     return cb();
   });
 
   vorpal.command('tone [frequency] [seconds]').description('play the current or given frequency').action(function(args, cb) {
-    var dur, f;
+    var dur, f, frequ, oldFreq;
     if (sound.runningSine) {
       logger.error('already playing tone');
       return cb();
     } else {
-      f = globalFrequency;
+      f = sound.freq;
+      oldFreq = f;
       if (args.frequency != null) {
         f = args.frequency;
       }
@@ -172,74 +160,79 @@
       if ((args.seconds != null) && (typeof args.seconds) === 'number') {
         dur = args.seconds;
       }
-      expectInt(f, function(frequ) {
+      frequ = expectFrequency(f);
+      if (frequ !== null) {
         sound.freq = frequ;
         startTone();
-        return setTimeout(function(frequency) {
+        setTimeout(function(frequency) {
           stopTone();
           return sound.freq = frequency;
-        }, dur * 1000, globalFrequency);
-      });
+        }, dur * 1000, oldFreq);
+      }
       return cb();
     }
   });
 
-  vorpal.command('bpm [bpm]').description('set the current bpm').action(function(args, cb) {
-    if (args.bpm == null) {
-      logger.info("bpm: " + sound.bpm);
-      return cb();
+  sop.command('meter', sound, {
+    validate: expectInt
+  }).hidden();
+
+  sop.command('freq', sound, {
+    validate: expectFrequency
+  }).description('set or print frequency, accepts integers or note names, e.g. g#5');
+
+  sop.command('length', sound, {
+    validate: expectFloat
+  });
+
+  sop.command('bpm', sound, {
+    validate: expectInt,
+    passedValidation: function(key, arg, value) {
+      return setBPM(value, true);
     }
-    expectInt(args.bpm, function(b) {
-      return setBPM(b);
-    });
-    return cb();
   });
 
   vorpal.command('add <bpm>').description('add to the current bpm').action(function(args, cb) {
-    expectInt(args.bpm, function(b) {
-      return setBPM(sound.bpm + b);
-    });
+    var b;
+    b = expectInt(args.bpm);
+    if (b !== null) {
+      metronome.setBPM(sound.bpm + b);
+    }
     return cb();
   });
 
   vorpal.command('mul <factor>').description('multiply the current bpm with the factor').alias('multiply').action(function(args, cb) {
-    expectFloat(args.factor, function(f) {
-      return setBPM(Math.round(sound.bpm * f));
-    });
+    var f;
+    f = expectFloat(args.factor);
+    if (f !== null) {
+      metronome.setBPM(Math.round(sound.bpm * f));
+    }
     return cb();
   });
 
-  vorpal.command('tapwindow [window]').description('how many of the last taps are used when tapping a tempo').action(function(args, cb) {
-    if (args.window == null) {
-      logger.info("window: " + avg);
-      return cb();
+  sop.command('tapwindow', settings, {
+    validate: expectInt,
+    passedValidation: function(key, arg, value) {
+      logger.confirm("set tapwindow to " + arg);
+      return bpm = new onetwoeight(settings.tapwindow, settings.taptolerance);
     }
-    expectInt(args.window, function(w) {
-      avg = w;
-      bpm = new onetwoeight(avg, tol);
-      return logger.confirm("set tapwindow to " + w);
-    });
-    return cb();
-  });
+  }).description('set or print how many of the last taps are used when tapping a tempo');
 
-  vorpal.command('taptolerance [tolerance]').description('tolerance when tapping a tempo').action(function(args, cb) {
-    if (args.tolerance == null) {
-      logger.info("tolerance: " + tol);
-      return cb();
+  sop.command('taptolerance', settings, {
+    validate: expectFloat,
+    passedValidation: function(key, arg, value) {
+      logger.confirm("set taptolerance to " + arg);
+      return bpm = new onetwoeight(settings.tapwindow, settings.taptolerance);
     }
-    expectFloat(args.tolerance, function(t) {
-      tol = t;
-      bpm = new onetwoeight(avg, tol);
-      return logger.confirm("set taptolerance to " + t);
-    });
-    return cb();
-  });
+  }).description('set or print tolerance when tapping a tempo');
 
   vorpal["catch"]('[input...]').action(function(args, cb) {
+    var b;
     if ((args.input != null) && (args.input.length = 1)) {
-      expectInt(args.input[0], function(b) {
-        return setBPM(b);
-      });
+      b = expectInt(args.input[0]);
+      if (b !== null) {
+        setBPM(b);
+      }
       return cb();
     }
     vorpal.exec('help');
@@ -289,5 +282,17 @@
   logger.info("protip#2: use " + (chalk.yellow('<ctrl | alt> + <arrow_left | arrow_right>')) + " to add or subtract from the current bpm");
 
   logger.info('protip#3: just enter any number to set bpm without needing a command');
+
+  module.exports = metronome = {
+    startMetronome: startMetronome,
+    stopMetronome: stopMetronome,
+    startTone: startTone,
+    stopTone: stopTone,
+    setBPM: setBPM,
+    expectInt: expectInt,
+    expectFloat: expectFloat,
+    expectFrequency: expectFrequency,
+    vorpal: vorpal
+  };
 
 }).call(this);
